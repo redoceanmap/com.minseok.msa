@@ -2,7 +2,6 @@
   "userIgnoreFilters": [
     "__pycache__",
     "alembic",
-    "node_modules",
     ".next",
     "out",
     ".coverage",
@@ -18,7 +17,9 @@
     "**/*.css",
     "**/*.scss",
     ".DS_Store",
-    ".env*"
+    ".env*",
+    "node_modules",
+    "www/node_modules/"
   ],
   "showUnsupportedFiles": false
 }
