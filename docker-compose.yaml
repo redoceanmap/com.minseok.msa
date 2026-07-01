@@ -9,6 +9,9 @@ services:
       - ./minseok:/app
     environment:
       - ENV=development
+      - OLLAMA_HOST=http://host.docker.internal:11434
+      - N8N_WEBHOOK_URL=http://n8n:5678/webhook/sherlock-email
+    command: sh -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
 
   frontend:
     build:
@@ -20,8 +23,9 @@ services:
       - ./www:/app
       - /app/.next
       - /app/node_modules
+    command: npm run dev
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=development
 
   n8n:
     image: docker.n8n.io/n8nio/n8n
