@@ -4,13 +4,13 @@ services:
       context: ./minseok
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "8100:8000"  # redoceanmap이 메인(8000) — ragwatson은 8100
     volumes:
       - ./minseok:/app
     environment:
       - ENV=development
       - OLLAMA_HOST=http://host.docker.internal:11434
-      - N8N_WEBHOOK_URL=http://n8n:5678/webhook/sherlock-email
+      - N8N_WEBHOOK_URL=http://host.docker.internal:5678/webhook/sherlock-email
     command: sh -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
 
   frontend:
@@ -18,7 +18,7 @@ services:
       context: ./www
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "3100:3000"
     volumes:
       - ./www:/app
       - /app/.next
@@ -27,21 +27,13 @@ services:
     environment:
       - NODE_ENV=development
 
-  n8n:
-    image: docker.n8n.io/n8nio/n8n
-    ports:
-      - "5678:5678"
-    volumes:
-      - n8n_data:/home/node/.n8n
-    environment:
-      - N8N_HOST=localhost
-      - N8N_PORT=5678
-      - WEBHOOK_URL=http://localhost:5678/
+  # n8n은 redoceanmap(메인) 스택이 소유 — 같은 n8n_data 볼륨을 쓰므로 여기서 띄우지 않는다.
+  # (동시 기동 시 SQLite 잠금 충돌. 필요하면 com.redoceanmap에서 docker compose up -d n8n)
 
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - redis_data:/data
     command: ["redis-server", "--appendonly", "yes"]
@@ -49,7 +41,7 @@ services:
   pgvector:
     image: pgvector/pgvector:pg16
     ports:
-      - "5432:5432"
+      - "5433:5432"  # 정식 5432는 redoceanmap pgvector
     volumes:
       - pgvector_data:/var/lib/postgresql/data
     environment:
@@ -60,16 +52,14 @@ services:
   neo4j:
     image: neo4j:5
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - "7475:7474"
+      - "7688:7687"
     volumes:
       - neo4j_data:/data
     environment:
       - NEO4J_AUTH=${NEO4J_AUTH:-neo4j/please_change}
 
 volumes:
-  n8n_data:
-    name: n8n_data
   redis_data:
   pgvector_data:
   neo4j_data:
