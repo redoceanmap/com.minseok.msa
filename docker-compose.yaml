@@ -7,8 +7,11 @@ services:
       - "8100:8000"  # redoceanmap이 메인(8000) — ragwatson은 8100
     volumes:
       - ./minseok:/app
+    env_file:
+      - .env  # GEMINI_API_KEY 등 비밀값 (environment가 같은 키보다 우선)
     environment:
       - ENV=development
+      - DATABASE_URL=postgresql+psycopg://${POSTGRES_USER:-raguser}:${POSTGRES_PASSWORD:-please_change}@pgvector:5432/${POSTGRES_DB:-ragdb}
       - OLLAMA_HOST=http://host.docker.internal:11434
       - N8N_WEBHOOK_URL=http://host.docker.internal:5678/webhook/sherlock-email
     command: sh -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
